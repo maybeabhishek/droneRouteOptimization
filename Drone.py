@@ -244,3 +244,84 @@ class Solution:
 	
 	def cost_and_savings(self):
 		# Returns total cost and savings of solution
+		if not self.deliveries_list:
+			return 0,0
+		else:
+			cost = 0
+			savings = 0
+			length = len(self.deliveries_list)
+			for i  in range(length):
+				if self.deliveries_list[i].parameters.cost_func:
+					interest = self.deliveries_list[i].cost_and_savings()
+					cost += interest[0]
+					savings += interest[1]
+			return cost, savings
+
+class Problem:
+
+	def __init__(self, depot = None, client_list = None):
+		self.depot = depot
+		self.client_list = list()
+		if client_list is not None:
+			self.client_list = client_list
+		self._number_of_generated_clients  = 0
+		self.solutions_list = list()
+	
+    @property
+    def number_of_generated_clients(self):
+        return self._number_of_generated_clients
+		
+	@property
+    def number_of_clients(self):
+        return len(self.clients_list)
+
+	@property
+    def total_demand(self):
+        total = 0
+        for client in self.clients_list:
+            if client:
+                total += client.demand
+        return total
+
+	def print_clients(self):
+		for client in self.clients_list:
+			print(repr(client))
+	
+    def print_depot(self):
+        print(repr(self.depot))
+
+	def print_solutions(self, detailed=False):
+        for solution in self.solutions_list:
+            solution.print(detailed)
+            print("\n\n")
+
+	def remove_solution_index(self, index):
+        del self.solutions_list[index]
+	
+	def remove_solution_named(self, name):
+        for i, solution in enumerate(self.solutions_list):
+            if solution["Name"] == name:
+                del self.solutions_list[i]
+                break
+	
+	def clear_solutions(self):
+		self.solutions_list.clear()
+	
+	def generate_random_clients(self, amount=1, x=(-10000, 10000), y=(-10000, 10000), demand=(1, 100)):
+	
+		for i in range(1, amount + 1):
+			self._number_of_generated_clients += 1
+			client_i = Client("random client {}".format(self._number_of_generated_clients),
+								((x[1] - x[0]) * (np.random.rand(1)) + x[0])[0],
+								((y[1] - y[0]) * (np.random.rand(1)) + y[0])[0],
+								(np.random.randint(demand[0], demand[1] + 1, 1))[0])
+			self.clients_list.append(client_i)
+	
+	def export_csv(self, file_name, cell_separator=";"):
+		with open(file_name, "w", newline='') as f:
+			writer = csv.writer(f, delimiter=cell_separator)
+			writer.writerow(["Delivery optimization problem"])
+			writer.writerow(["type", "identifier", "x", "y", "demand"])
+			writer.writerow(["depot", self.depot.identifier, self.depot.x, self.depot.y])
+			for client in self.clients_list:
+				writer.writerow(["client", client.identifier, client.x, client.y, client.demand])
