@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class Drone:
 
 	def __init__(self,capacity=100,speed=10,acd=0.01):
@@ -229,4 +228,19 @@ class Solution:
 		a = len(self.deliveries_list)
 		for i in range(0,a):
 			if self.deliveries_list[i].is_legal is False:
-				
+				return False
+		
+		ctot = []
+		for i in range(0,a):
+			for j in self.deliveries_list[i].clients_list:
+				ctot.append(j)
+		lctot = len(ctot)
+
+		for k in range(0, lctot - 1):
+			for l in  range(k+1, lctot):
+				if ctot[k]==ctot[l]:
+					return False
+		return True
+	
+	def cost_and_savings(self):
+		# Returns total cost and savings of solution
