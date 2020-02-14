@@ -259,11 +259,11 @@ class Solution:
 
 class Problem:
 
-    def __init__(self, depot = None, client_list = None):
+    def __init__(self, depot = None, clients_list = None):
         self.depot = depot
-        self.client_list = list()
-        if client_list is not None:
-            self.client_list = client_list
+        self.clients_list = list()
+        if clients_list is not None:
+            self.clients_list = clients_list
         self._number_of_generated_clients  = 0
         self.solutions_list = list()
 
@@ -326,3 +326,21 @@ class Problem:
             writer.writerow(["depot", self.depot.identifier, self.depot.x, self.depot.y])
             for client in self.clients_list:
                 writer.writerow(["client", client.identifier, client.x, client.y, client.demand])
+    
+    def import_csv(self, file_name, cell_separator=";"):
+    # """This method reads a problem from a file in csv format.
+    # file_name is a string"""
+        with open(file_name, newline='') as f:
+            reader = csv.reader(f, delimiter=cell_separator)
+            new_clients_list = list()
+            for i, row in enumerate(reader):
+                if i == 0 and row[0] != "Delivery optimization problem":
+                    raise (FileExistsError, "Incorrect file type.")
+                if i >= 2:
+                    if row[0] == "depot":
+                        self.depot = Depot(row[1], float(row[2]), float(row[3]))
+                    if row[0] == "client":
+                        new_clients_list.append(Client(row[1], float(row[2]), float(row[3]), int(row[4])))
+                        if "random client" in row[1]:
+                            self._number_of_generated_clients += 1
+            self.clients_list = new_clients_list
